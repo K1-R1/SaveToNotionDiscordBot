@@ -50,19 +50,19 @@ client.on('messageReactionAdd', (reaction, user) => {
     if (user.bot) return;
     console.log('reaction');
     if (reaction.emoji.name === "✍️") {
-        if (reaction.message.member.roles.cache.some(role => role.name === 'Admin')) { ///CHANGE ROLES
-            let embed = new MessageEmbed()
-                .setTitle('Content added to Notion')
-                .setDescription(reaction.message.content)
-                .setAuthor({
-                    name: reaction.message.author.tag,
-                    iconURL: reaction.message.author.displayAvatarURL()
-                });
-            addItem(reaction.message.content);
-            reaction.message.channel.send({ embeds: [embed] })
-                .catch(console.error);
-            return;
-        }
+        //if (reaction.message.member.roles.cache.some(role => role.name === 'Admin')) { 
+        let embed = new MessageEmbed()
+            .setTitle('Content added to Notion')
+            .setDescription(reaction.message.content)
+            .setAuthor({
+                name: reaction.message.author.tag,
+                iconURL: reaction.message.author.displayAvatarURL()
+            });
+        addItem(reaction.message.content);
+        reaction.message.channel.send({ embeds: [embed] })
+            .catch(console.error);
+        return;
+        //}
     }
 }
 );
