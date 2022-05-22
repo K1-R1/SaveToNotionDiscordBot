@@ -1,6 +1,12 @@
 require('dotenv').config();
 const linkify = require('linkifyjs');
 
+//tag info lookup
+const tagInfo = {
+    "✍️": "Website",
+    "🔍": "Article"
+}
+
 // Discord token
 const token = process.env.DISCORD_TOKEN
 
@@ -13,7 +19,7 @@ var { Client } = require("@notionhq/client");
 const notion = new Client({ auth: NOTION_KEY })
 
 // Function to write to Notion
-async function addItem(username, message) {
+async function addItem(username, message, emoji) {
     try {
         //Extract any links
         const linksObjectsArray = [];
@@ -48,6 +54,11 @@ async function addItem(username, message) {
                 },
                 Link: {
                     url: linksObjectsArray[0]
+                },
+                Tag: {
+                    multi_select: [
+                        { "name": tagInfo[emoji] }
+                    ]
                 }
             },
         })
@@ -72,8 +83,8 @@ client.on('ready', () => {
 client.on('messageReactionAdd', (reaction, user) => {
     if (user.bot) return;
     console.log('reaction');
-
-    if (reaction.emoji.name === "✍️") {
+    const emoji = reaction.emoji.name;
+    if (emoji === "✍️" || emoji === "🔍") {
         //if (reaction.message.member.roles.cache.some(role => role.name === 'Admin')) { 
         let username = reaction.message.author.tag;
         let message = reaction.message.content
@@ -84,7 +95,7 @@ client.on('messageReactionAdd', (reaction, user) => {
                 name: username,
                 iconURL: reaction.message.author.displayAvatarURL()
             });
-        addItem(username, message);
+        addItem(username, message, emoji);
         reaction.message.channel.send({ embeds: [embed] })
             .catch(console.error);
         return;
