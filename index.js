@@ -1,4 +1,5 @@
 require('dotenv').config();
+const linkify = require('linkifyjs');
 
 // Discord token
 const token = process.env.DISCORD_TOKEN
@@ -12,18 +13,41 @@ var { Client } = require("@notionhq/client");
 const notion = new Client({ auth: NOTION_KEY })
 
 // Function to write to Notion
-async function addItem(text) {
+async function addItem(username, message) {
     try {
+        //Extract any links
+        const linksObjectsArray = [];
+        if (linkify.find(message).length > 0) {
+            for (i = 0; i < linkify.find(message).length; i++) {
+                let obj = linkify.find(message)[i];
+                if (obj.type === 'url' && obj.isLink) {
+                    let linkObject = obj.value;
+                    linksObjectsArray.push(linkObject);
+                }
+            }
+        }
+        //Add item to notion database
         const response = await notion.pages.create({
             parent: { database_id: NOTION_DATABASE_ID },
             properties: {
-                title: {
+                Name: {
                     title: [
                         {
                             "text": {
-                                "content": text
+                                "content": username
                             }
                         }]
+                },
+                Message: {
+                    rich_text: [
+                        {
+                            "text": {
+                                "content": message
+                            }
+                        }]
+                },
+                Link: {
+                    url: linksObjectsArray[0]
                 }
             },
         })
@@ -33,7 +57,6 @@ async function addItem(text) {
         console.error(error.body)
     }
 }
-
 
 // Import the discord.js module
 var { Client, Intents, MessageEmbed } = require('discord.js');
@@ -49,16 +72,19 @@ client.on('ready', () => {
 client.on('messageReactionAdd', (reaction, user) => {
     if (user.bot) return;
     console.log('reaction');
+
     if (reaction.emoji.name === "✍️") {
         //if (reaction.message.member.roles.cache.some(role => role.name === 'Admin')) { 
+        let username = reaction.message.author.tag;
+        let message = reaction.message.content
         let embed = new MessageEmbed()
             .setTitle('Content added to Notion')
-            .setDescription(reaction.message.content)
+            .setDescription(message)
             .setAuthor({
-                name: reaction.message.author.tag,
+                name: username,
                 iconURL: reaction.message.author.displayAvatarURL()
             });
-        addItem(reaction.message.content);
+        addItem(username, message);
         reaction.message.channel.send({ embeds: [embed] })
             .catch(console.error);
         return;
