@@ -3,8 +3,8 @@ const linkify = require('linkifyjs');
 
 //tag info lookup
 const tagInfo = {
-    "✍️": "Website",
-    "🔍": "Article"
+    "✍️": "Website✍",
+    "🔍": "Article🔍"
 }
 
 // Discord token
@@ -31,6 +31,8 @@ async function addItem(username, message, emoji) {
                     linksObjectsArray.push(linkObject);
                 }
             }
+        } else {
+            linksObjectsArray.push('No link');
         }
         //Add item to notion database
         const response = await notion.pages.create({
