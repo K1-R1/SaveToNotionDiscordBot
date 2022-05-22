@@ -12,6 +12,8 @@
   "dependencies": {
     "@notionhq/client": "^1.0.4",
     "discord.js": "^13.7.0",
-    "dotenv": "^16.0.1"
+    "dotenv": "^16.0.1",
+    "linkify-html": "^3.0.5",
+    "linkifyjs": "^3.0.5"
   }
 }
