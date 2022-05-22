@@ -62,8 +62,9 @@ async function addItem(username, message, emoji) {
                 }
             },
         })
+        console.log(`--------------------\nSuccess; Entry added\nEntry info:`)
         console.log(response)
-        console.log("Success! Entry added.")
+        console.log(`--------------------\n`)
     } catch (error) {
         console.error(error.body)
     }
@@ -76,13 +77,12 @@ const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_
 
 // Ready event
 client.on('ready', () => {
-    console.log('I am ready!');
+    console.log('Save to Notion bot is ready!');
 });
 
 //Save to notion
 client.on('messageReactionAdd', (reaction, user) => {
     if (user.bot) return;
-    console.log('reaction');
     const emoji = reaction.emoji.name;
     if (emoji === "✍️" || emoji === "🔍") {
         //if (reaction.message.member.roles.cache.some(role => role.name === 'Admin')) { 
