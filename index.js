@@ -3,8 +3,11 @@ const linkify = require('linkifyjs');
 
 //tag info lookup
 const tagInfo = {
-    "✍️": "Website✍",
-    "🔍": "Article🔍"
+    "⚡": "DAOs⚡",
+    "🌐": "Web3🌐",
+    "🎨": "NFTs🎨",
+    "📖": "Books📖",
+    "🎮": "Metaverse🎮"
 }
 
 // Discord token
@@ -86,7 +89,13 @@ client.on('ready', () => {
 client.on('messageReactionAdd', (reaction, user) => {
     if (user.bot) return;
     const emoji = reaction.emoji.name;
-    if (emoji === "✍️" || emoji === "🔍") {
+    if (
+        emoji === "⚡" ||
+        emoji === "🌐" ||
+        emoji === "🎨" ||
+        emoji === "📖" ||
+        emoji === "🎮"
+    ) {
         //if (reaction.message.member.roles.cache.some(role => role.name === 'Admin')) { 
         let username = reaction.message.author.tag;
         let message = reaction.message.content
