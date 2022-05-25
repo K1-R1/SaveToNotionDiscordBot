@@ -41,19 +41,19 @@ async function addItem(username, message, emoji) {
         const response = await notion.pages.create({
             parent: { database_id: NOTION_DATABASE_ID },
             properties: {
-                Name: {
+                Message: {
                     title: [
                         {
                             "text": {
-                                "content": username
+                                "content": message
                             }
                         }]
                 },
-                Message: {
+                Name: {
                     rich_text: [
                         {
                             "text": {
-                                "content": message
+                                "content": username
                             }
                         }]
                 },
@@ -99,12 +99,13 @@ client.on('messageReactionAdd', (reaction, user) => {
         //if (reaction.message.member.roles.cache.some(role => role.name === 'Admin')) { 
         let username = reaction.message.author.tag;
         let message = reaction.message.content
+        let iconURL = reaction.message.author.displayAvatarURL()
         let embed = new MessageEmbed()
             .setTitle('Content added to Notion')
             .setDescription(message)
             .setAuthor({
                 name: username,
-                iconURL: reaction.message.author.displayAvatarURL()
+                iconURL: iconURL
             });
         addItem(username, message, emoji);
         reaction.message.channel.send({ embeds: [embed] })
