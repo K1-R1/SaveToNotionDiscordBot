@@ -42,16 +42,24 @@ async function addItem(username, message, emoji) {
         }
 
         //test//
-        if (checkIfAlreadyAdded(
+        // if (checkIfAlreadyAdded(
+        //     NOTION_DATABASE_ID,
+        //     messageBeforeLink,
+        //     linksObjectsArray[0],
+        //     username,
+        //     tagInfo[emoji]
+        // )) {
+        //     console.log('!!!!!!!!!!!!!!!!!!!! Item already added')
+        //     return
+        // }
+        checkIfAlreadyAdded(
             NOTION_DATABASE_ID,
             messageBeforeLink,
             linksObjectsArray[0],
             username,
             tagInfo[emoji]
-        )) {
-            console.log('!!!!!!!!!!!!!!!!!!!! Item already added')
-            return
-        }
+        )
+
 
         //Add item to notion database
         const response = await notion.pages.create({
@@ -171,9 +179,12 @@ const checkIfAlreadyAdded = async (databaseId, messageBeforeLink, link, username
             ],
         }
     });
-    if (response['results'].length > 1) {
-        return true
-    } else {
-        return false
-    }
+    // if (response['results'].length > 1) {
+    //     return true
+    // } else {
+    //     return false
+    // }
+    console.log('-------------------------querey:')
+    console.log(response)
+    console.log(`Already in table: ${response['results'].length}`)
 };
