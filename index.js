@@ -23,80 +23,77 @@ const notion = new Client({ auth: NOTION_KEY })
 
 // Function to write to Notion
 async function addItem(username, message, emoji) {
-    try {
-        //Message before link
-        const messageBeforeLink = message.slice(0, linkify.find(message)[0]['start']);
+    // try {
 
-        //Extract any links
-        const linksObjectsArray = [];
-        if (linkify.find(message).length > 0) {
-            for (i = 0; i < linkify.find(message).length; i++) {
-                let obj = linkify.find(message)[i];
-                if (obj.type === 'url' && obj.isLink) {
-                    let linkObject = obj.value;
-                    linksObjectsArray.push(linkObject);
-                }
-            }
-        } else {
-            linksObjectsArray.push('No link');
-        }
-
-        //test//
-        // if (checkIfAlreadyAdded(
-        //     NOTION_DATABASE_ID,
-        //     messageBeforeLink,
-        //     linksObjectsArray[0],
-        //     username,
-        //     tagInfo[emoji]
-        // )) {
-        //     console.log('!!!!!!!!!!!!!!!!!!!! Item already added')
-        //     return
-        // }
-        checkIfAlreadyAdded(
-            NOTION_DATABASE_ID,
-            messageBeforeLink,
-            linksObjectsArray[0],
-            username,
-            tagInfo[emoji]
-        )
-
-
-        //Add item to notion database
-        const response = await notion.pages.create({
-            parent: { database_id: NOTION_DATABASE_ID },
-            properties: {
-                Message: {
-                    title: [
-                        {
-                            "text": {
-                                "content": messageBeforeLink
-                            }
-                        }]
-                },
-                Name: {
-                    rich_text: [
-                        {
-                            "text": {
-                                "content": username
-                            }
-                        }]
-                },
-                Link: {
-                    url: linksObjectsArray[0]
-                },
-                Tag: {
-                    multi_select: [
-                        { "name": tagInfo[emoji] }
-                    ]
-                }
-            },
-        })
-        console.log(`--------------------\nSuccess; Entry added\nEntry info:`)
-        console.log(response)
-        console.log(`--------------------\n`)
-    } catch (error) {
-        console.error(error.body)
+    //Message before link
+    let messageBeforeLink = message;
+    if (linkify.find(message).length > 0) {
+        messageBeforeLink = message.slice(0, linkify.find(message)[0]['start']);
     }
+
+    //Extract any links
+    const linksObjectsArray = [];
+    if (linkify.find(message).length > 0) {
+        for (i = 0; i < linkify.find(message).length; i++) {
+            let obj = linkify.find(message)[i];
+            if (obj.type === 'url' && obj.isLink) {
+                let linkObject = obj.value;
+                linksObjectsArray.push(linkObject);
+            }
+        }
+    } else {
+        linksObjectsArray.push('No link');
+    }
+
+    //test//
+    const alreadyAdded = await checkIfAlreadyAdded(
+        NOTION_DATABASE_ID,
+        messageBeforeLink,
+        linksObjectsArray[0],
+        username,
+        tagInfo[emoji]
+    )
+    if (alreadyAdded) {
+        console.log('Item already in table');
+        return;
+    }
+
+    //Add item to notion database
+    const response = await notion.pages.create({
+        parent: { database_id: NOTION_DATABASE_ID },
+        properties: {
+            Message: {
+                title: [
+                    {
+                        "text": {
+                            "content": messageBeforeLink
+                        }
+                    }]
+            },
+            Name: {
+                rich_text: [
+                    {
+                        "text": {
+                            "content": username
+                        }
+                    }]
+            },
+            Link: {
+                url: linksObjectsArray[0]
+            },
+            Tag: {
+                multi_select: [
+                    { "name": tagInfo[emoji] }
+                ]
+            }
+        },
+    })
+    console.log(`--------------------\nSuccess; Entry added\nEntry info:`)
+    console.log(response)
+    console.log(`--------------------\n`)
+    // } catch (error) {
+    //     console.error(error.body)
+    // }
 }
 
 // Import the discord.js module
@@ -148,43 +145,45 @@ client.login(token);
 
 //Check if entry is already in table
 const checkIfAlreadyAdded = async (databaseId, messageBeforeLink, link, username, tag) => {
+    const filterAndArray = [
+        {
+            property: 'Message',
+            title: {
+                contains: messageBeforeLink
+            }
+        },
+        {
+            property: 'Name',
+            rich_text: {
+                contains: username
+            }
+        },
+        {
+            property: 'Tag',
+            multi_select: {
+                contains: tag
+            }
+        },
+        {
+            property: 'Link',
+            url: {
+                contains: link
+            }
+        }
+    ];
     const response = await notion.databases.query({
         database_id: databaseId,
         filter: {
-            and: [
-                {
-                    property: 'Message',
-                    title: {
-                        contains: messageBeforeLink
-                    }
-                },
-                {
-                    property: 'Link',
-                    url: {
-                        contains: link
-                    }
-                },
-                {
-                    property: 'Name',
-                    rich_text: {
-                        contains: username
-                    }
-                },
-                {
-                    property: 'Tag',
-                    multi_select: {
-                        contains: tag
-                    }
-                },
-            ],
+            and: filterAndArray
         }
     });
-    // if (response['results'].length > 1) {
-    //     return true
-    // } else {
-    //     return false
-    // }
     console.log('-------------------------querey:')
     console.log(response)
     console.log(`Already in table: ${response['results'].length}`)
+
+    let alreadyInTable = false;
+    if (response['results'].length > 0) {
+        alreadyInTable = true;
+    }
+    return alreadyInTable;
 };
