@@ -24,6 +24,9 @@ const notion = new Client({ auth: NOTION_KEY })
 // Function to write to Notion
 async function addItem(username, message, emoji) {
     try {
+        //Message before link
+        const messageBeforeLink = message.slice(0, linkify.find(message)[0]['start']);
+
         //Extract any links
         const linksObjectsArray = [];
         if (linkify.find(message).length > 0) {
@@ -37,6 +40,7 @@ async function addItem(username, message, emoji) {
         } else {
             linksObjectsArray.push('No link');
         }
+
         //Add item to notion database
         const response = await notion.pages.create({
             parent: { database_id: NOTION_DATABASE_ID },
@@ -45,7 +49,7 @@ async function addItem(username, message, emoji) {
                     title: [
                         {
                             "text": {
-                                "content": message
+                                "content": messageBeforeLink
                             }
                         }]
                 },
