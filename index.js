@@ -41,6 +41,10 @@ async function addItem(username, message, emoji) {
             linksObjectsArray.push('No link');
         }
 
+        //test//
+        checkIfAlreadyAdded(NOTION_DATABASE_ID, messageBeforeLink, linksObjectsArray[0], username, tagInfo[emoji]);
+
+
         //Add item to notion database
         const response = await notion.pages.create({
             parent: { database_id: NOTION_DATABASE_ID },
@@ -122,3 +126,44 @@ client.on('messageReactionAdd', (reaction, user) => {
 
 //Log bot in
 client.login(token);
+
+
+
+
+//Check if entry is already in table
+const checkIfAlreadyAdded = async (databaseId, messageBeforeLink, link, username, tag) => {
+    const response = await notion.databases.query({
+        database_id: databaseId,
+        filter: {
+            and: [
+                {
+                    property: 'Message',
+                    title: {
+                        contains: messageBeforeLink
+                    }
+                },
+                {
+                    property: 'Link',
+                    url: {
+                        contains: link
+                    }
+                },
+                {
+                    property: 'Name',
+                    rich_text: {
+                        contains: username
+                    }
+                },
+                {
+                    property: 'Tag',
+                    multi_select: {
+                        contains: tag
+                    }
+                },
+            ],
+        }
+    });
+    if (response['results'].length > 1) {
+        return true
+    }
+};
