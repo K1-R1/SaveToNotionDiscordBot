@@ -23,8 +23,6 @@ const notion = new Client({ auth: NOTION_KEY })
 
 // Function to write to Notion
 async function addItem(username, message, emoji) {
-    // try {
-
     //Message before link
     let messageBeforeLink = message;
     if (linkify.find(message).length > 0) {
@@ -45,7 +43,7 @@ async function addItem(username, message, emoji) {
         linksObjectsArray.push('No link');
     }
 
-    //test//
+    //Check for repeat entry
     const alreadyAdded = await checkIfAlreadyAdded(
         NOTION_DATABASE_ID,
         messageBeforeLink,
@@ -91,9 +89,6 @@ async function addItem(username, message, emoji) {
     console.log(`--------------------\nSuccess; Entry added\nEntry info:`)
     console.log(response)
     console.log(`--------------------\n`)
-    // } catch (error) {
-    //     console.error(error.body)
-    // }
 }
 
 // Import the discord.js module
@@ -140,9 +135,6 @@ client.on('messageReactionAdd', (reaction, user) => {
 //Log bot in
 client.login(token);
 
-
-
-
 //Check if entry is already in table
 const checkIfAlreadyAdded = async (databaseId, messageBeforeLink, link, username, tag) => {
     const filterAndArray = [
@@ -177,10 +169,6 @@ const checkIfAlreadyAdded = async (databaseId, messageBeforeLink, link, username
             and: filterAndArray
         }
     });
-    console.log('-------------------------querey:')
-    console.log(response)
-    console.log(`Already in table: ${response['results'].length}`)
-
     let alreadyInTable = false;
     if (response['results'].length > 0) {
         alreadyInTable = true;
