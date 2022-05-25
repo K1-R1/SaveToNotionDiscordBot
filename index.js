@@ -123,7 +123,7 @@ client.on('messageReactionAdd', (reaction, user) => {
                 name: username,
                 iconURL: iconURL
             });
-        addItem(username, message, emoji);
+        await addItem(username, message, emoji);
         reaction.message.channel.send({ embeds: [embed] })
             .catch(console.error);
         return;
